@@ -1,0 +1,50 @@
+package recaptcha
+
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+)
+
+const REQUEST_URL = "https://www.google.com/recaptcha/api/siteverify"
+
+// Проверяем капчу
+func Check(r *http.Request, secret string) (ok bool) {
+	// Формируем запрос
+	q := url.Values{}
+	q.Add("response", r.FormValue("g-recaptcha-response"))
+	q.Add("remoteip", r.Header.Get("X-Real-IP"))
+	q.Add("secret", secret)
+
+	resp, err := http.PostForm(REQUEST_URL, q)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	// Читаем овтет
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	var ans Ans
+	err = json.Unmarshal(content, &ans)
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	// Если проверка пройдена
+	if ans.Success == true {
+		ok = true
+	}
+
+	return
+}
