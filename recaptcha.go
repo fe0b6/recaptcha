@@ -42,3 +42,36 @@ func Check(r *http.Request, secret string) (ans Ans) {
 
 	return
 }
+
+// CheckGQL - Проверяем капчу fql
+func CheckGQL(response, ip, secret string) (ans Ans) {
+	// Формируем запрос
+	q := url.Values{}
+	q.Add("response", response)
+	q.Add("remoteip", ip)
+	q.Add("secret", secret)
+
+	resp, err := http.PostForm(requestURL, q)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	// Читаем овтет
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	err = json.Unmarshal(content, &ans)
+	if err != nil {
+		log.Println("[error]", err)
+		return
+	}
+
+	return
+}
