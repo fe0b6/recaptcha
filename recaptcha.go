@@ -8,9 +8,9 @@ import (
 	"net/url"
 )
 
-const REQUEST_URL = "https://www.google.com/recaptcha/api/siteverify"
+const requestURL = "https://www.google.com/recaptcha/api/siteverify"
 
-// Проверяем капчу
+// Check - Проверяем капчу
 func Check(r *http.Request, secret string) (ok bool) {
 	// Формируем запрос
 	q := url.Values{}
@@ -18,7 +18,7 @@ func Check(r *http.Request, secret string) (ok bool) {
 	q.Add("remoteip", r.Header.Get("X-Real-IP"))
 	q.Add("secret", secret)
 
-	resp, err := http.PostForm(REQUEST_URL, q)
+	resp, err := http.PostForm(requestURL, q)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
