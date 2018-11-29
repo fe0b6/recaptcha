@@ -11,7 +11,7 @@ import (
 const requestURL = "https://www.google.com/recaptcha/api/siteverify"
 
 // Check - Проверяем капчу
-func Check(r *http.Request, secret string) (ok bool) {
+func Check(r *http.Request, secret string) (ans Ans) {
 	// Формируем запрос
 	q := url.Values{}
 	q.Add("response", r.FormValue("g-recaptcha-response"))
@@ -34,16 +34,10 @@ func Check(r *http.Request, secret string) (ok bool) {
 		return
 	}
 
-	var ans Ans
 	err = json.Unmarshal(content, &ans)
 	if err != nil {
 		log.Println("[error]", err)
 		return
-	}
-
-	// Если проверка пройдена
-	if ans.Success == true {
-		ok = true
 	}
 
 	return
